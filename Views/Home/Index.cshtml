@@ -1,0 +1,76 @@
+﻿@model List<OnlineStore.Models.Product>
+
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- Hero Section -->
+<div class="p-5 mb-5 rounded-4 text-white text-center"
+     style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
+    <h1 class="display-5 fw-bold">
+        <i class="bi bi-shop"></i> Welcome to OnlineStore
+    </h1>
+    <p class="lead mb-4">Discover amazing products at great prices</p>
+    <a asp-controller="Products" asp-action="Index"
+       class="btn btn-light btn-lg px-5">
+        <i class="bi bi-grid"></i> Browse All Products
+    </a>
+</div>
+
+<!-- Featured Products -->
+<h2 class="fw-bold mb-4">
+    <i class="bi bi-star"></i> Featured Products
+</h2>
+
+<div class="row g-4">
+    @foreach (var product in Model)
+    {
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0 rounded-4">
+                <img src="@product.ImageUrl"
+                     class="card-img-top rounded-top-4"
+                     alt="@product.Name"
+                     style="height:200px; object-fit:cover;" />
+                <div class="card-body">
+                    <span class="badge mb-2"
+                          style="background:#1a1a2e">
+                        @product.Category?.Name
+                    </span>
+                    <h5 class="card-title fw-bold">@product.Name</h5>
+                    <p class="card-text text-muted" style="font-size:14px">
+                        @product.Description
+                    </p>
+                </div>
+                <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center">
+                    <span class="fw-bold fs-5" style="color:#1a1a2e">
+                        $@product.Price.ToString("0.00")
+                    </span>
+                    <a asp-controller="Products"
+                       asp-action="Detail"
+                       asp-route-id="@product.Id"
+                       class="btn btn-primary btn-sm px-3">
+                        <i class="bi bi-eye"></i> View
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Categories Banner -->
+<div class="mt-5 p-4 bg-white rounded-4 shadow-sm text-center">
+    <h4 class="fw-bold mb-3">Shop by Category</h4>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      @foreach (var cat in (ViewBag.Categories as List<OnlineStore.Models.Category>) ?? new List<OnlineStore.Models.Category>())
+        {
+            <a asp-controller="Products" asp-action="Index"
+               asp-route-category="@cat.Name"
+               class="btn btn-outline-dark px-4">
+                @cat.Name
+                <span class="badge ms-1" style="background:#1a1a2e">
+                    @cat.Products.Count
+                </span>
+            </a>
+        }
+    </div>
+</div>

@@ -1,0 +1,209 @@
+@model List<OnlineStore.Models.Category>
+
+@{
+    ViewData["Title"] = "Manage Categories";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">
+        <i class="bi bi-tag"></i> Manage Categories
+    </h2>
+    <div class="d-flex gap-2">
+        <a asp-controller="Admin" asp-action="Dashboard"
+           class="btn btn-outline-dark btn-sm">
+            <i class="bi bi-arrow-left"></i> Dashboard
+        </a>
+        <button class="btn btn-sm text-white"
+                style="background:#1a1a2e"
+                data-bs-toggle="modal"
+                data-bs-target="#addCategoryModal">
+            <i class="bi bi-plus-lg"></i> Add Category
+        </button>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-circle"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Categories Table -->
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead style="background:#1a1a2e; color:white">
+                <tr>
+                    <th class="p-3">ID</th>
+                    <th class="p-3">Category Name</th>
+                    <th class="p-3">Products Count</th>
+                    <th class="p-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var category in Model)
+                {
+                    <tr>
+                        <td class="p-3">#@category.Id</td>
+                        <td class="p-3 fw-bold">
+                            <i class="bi bi-tag text-primary"></i>
+                            @category.Name
+                        </td>
+                        <td class="p-3">
+                            <span class="badge bg-primary">
+                                @category.Products.Count product(s)
+                            </span>
+                        </td>
+                        <td class="p-3">
+                            <button class="btn btn-sm btn-outline-primary me-1"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editModal@(category.Id)">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <form asp-controller="Admin"
+                                  asp-action="DeleteCategory"
+                                  method="post"
+                                  class="d-inline"
+                                  id="deleteCatForm@(category.Id)">
+                                <input type="hidden" name="id" value="@category.Id" />
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="confirmDelete('@category.Id', '@category.Name')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <!-- Edit Modal for each category -->
+                    <div class="modal fade" id="editModal@(category.Id)" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content rounded-4">
+                                <div class="modal-header" style="background:#1a1a2e">
+                                    <h5 class="modal-title text-white">
+                                        <i class="bi bi-pencil"></i> Edit Category
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white"
+                                            data-bs-dismiss="modal"></button>
+                                </div>
+                                <form asp-controller="Admin"
+                                      asp-action="EditCategory"
+                                      method="post">
+                                    <div class="modal-body p-4">
+                                        <input type="hidden" name="id" value="@category.Id" />
+                                        <label class="form-label fw-bold">Category Name</label>
+                                        <input type="text" name="name"
+                                               class="form-control form-control-lg"
+                                               value="@category.Name" required />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button"
+                                                class="btn btn-outline-dark"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit"
+                                                class="btn text-white"
+                                                style="background:#1a1a2e">
+                                            <i class="bi bi-save"></i> Save Changes
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4">
+            <div class="modal-header" style="background:#1a1a2e">
+                <h5 class="modal-title text-white">
+                    <i class="bi bi-plus-lg"></i> Add New Category
+                </h5>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-controller="Admin" asp-action="AddCategory" method="post">
+                <div class="modal-body p-4">
+                    <label class="form-label fw-bold">Category Name</label>
+                    <input type="text" name="name"
+                           class="form-control form-control-lg"
+                           placeholder="e.g. Electronics" required />
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-outline-dark"
+                            data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit"
+                            class="btn text-white"
+                            style="background:#1a1a2e">
+                        <i class="bi bi-plus-lg"></i> Add Category
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-body p-4 text-center">
+                <div style="width:60px;height:60px;background:#fff0f0;border-radius:50%;
+                            display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px">
+                    <i class="bi bi-trash text-danger" style="font-size:28px"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Delete Category</h5>
+                <p class="text-muted mb-4">
+                    Are you sure you want to delete
+                    <strong id="categoryName"></strong>?
+                    This action cannot be undone.
+                </p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button"
+                            class="btn btn-outline-dark px-4"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="button"
+                            class="btn btn-danger px-4"
+                            id="confirmDeleteBtn">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var deleteFormId = "";
+
+        function confirmDelete(catId, catName) {
+            deleteFormId = "deleteCatForm" + catId;
+            document.getElementById("categoryName").textContent = catName;
+            var modal = new bootstrap.Modal(document.getElementById("deleteModal"));
+            modal.show();
+        }
+
+        document.getElementById("confirmDeleteBtn").addEventListener("click", function () {
+            document.getElementById(deleteFormId).submit();
+        });
+    </script>
+}

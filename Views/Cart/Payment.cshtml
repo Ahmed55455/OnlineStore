@@ -1,0 +1,335 @@
+@model OnlineStore.Models.Order
+
+@{
+    ViewData["Title"] = "Payment";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-10">
+        <h2 class="fw-bold mb-4">
+            <i class="bi bi-credit-card"></i> Payment
+        </h2>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="bi bi-exclamation-circle"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="row g-4">
+
+            <!-- Payment Form -->
+            <div class="col-md-7">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">
+                            <i class="bi bi-lock"></i> Secure Payment
+                        </h5>
+
+                      <!-- Card Type Icons -->
+                        <div class="d-flex gap-2 mb-4">
+                            <div class="px-3 py-1 rounded-3 border d-flex align-items-center gap-1"
+                                style="background:#ff5f00">
+                                <span style="width:20px;height:20px;background:#eb001b;border-radius:50%;display:inline-block"></span>
+                                <span style="width:20px;height:20px;background:#f79e1b;border-radius:50%;display:inline-block;margin-left:-10px"></span>
+                                <span class="text-white fw-bold ms-1" style="font-size:12px">Mastercard</span>
+                            </div>
+                            <div class="px-3 py-1 rounded-3 border d-flex align-items-center"
+                                style="background:#1a1f71">
+                                <span class="text-white fw-bold" style="font-size:16px;font-style:italic">VISA</span>
+                            </div>
+                        </div>
+                        
+                        <form asp-controller="Cart"
+                              asp-action="ProcessPayment"
+                              method="post"
+                              id="paymentForm">
+                            <input type="hidden" name="orderId" value="@Model.Id" />
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Card Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-credit-card"></i>
+                                    </span>
+                                    <input type="text"
+                                           name="cardNumber"
+                                           id="cardNumber"
+                                           class="form-control form-control-lg"
+                                           placeholder="4242 4242 4242 4242"
+                                           maxlength="19"
+                                           required />
+                                </div>
+                                <div id="cardError" class="text-danger mt-1" style="font-size:13px"></div>
+                                <small class="text-muted">Use any 16 digit number for testing</small>
+                            </div>
+
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Card Holder Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+                                    <input type="text"
+                                           name="cardHolder"
+                                           class="form-control form-control-lg"
+                                           placeholder="John Doe"
+                                           value="@Model.CustomerName"
+                                           required />
+                                </div>
+                                <div id="holderError" class="text-danger mt-1" style="font-size:13px"></div>
+                            </div>
+
+                      <div class="row g-3 mb-4">
+                          <div class="col-md-6">
+                            <label class="form-label fw-bold">Expiry Date</label>
+                              <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-calendar"></i>
+                                </span>
+                                <input type="text"
+                                    name="expiryDate"
+                                    id="expiryDate"
+                                    class="form-control form-control-lg"
+                                    placeholder="MM/YY"
+                                    maxlength="5"
+                                    required />
+                      </div>
+                                <div id="expiryError" class="text-danger mt-1" style="font-size:13px"></div>
+                      </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">CVV</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-shield-lock"></i>
+                                        </span>
+                                        <input type="password"
+                                               name="cvv"
+                                               class="form-control form-control-lg"
+                                               placeholder="123"
+                                               maxlength="3"
+                                               required />
+                                    </div>
+                                    <div id="cvvError" class="text-danger mt-1" style="font-size:13px"></div>
+                                </div>
+                            </div>
+
+                            <!-- Pay Button -->
+                            <button type="submit"
+                                    class="btn btn-lg w-100 text-white"
+                                    style="background:#27ae60"
+                                    id="payBtn"
+                                <i class="bi bi-lock"></i>
+                                Pay $@Model.TotalPrice.ToString("0.00") Now
+                            </button>
+
+                            <a asp-controller="Cart" asp-action="Index"
+                               class="btn btn-outline-dark btn-lg w-100 mt-2">
+                                <i class="bi bi-arrow-left"></i> Back to Cart
+                            </a>
+                        </form>
+
+                        <!-- Loading Spinner -->
+                        <div id="loadingDiv" class="text-center mt-4" style="display:none">
+                            <div class="spinner-border text-success mb-3" style="width:50px;height:50px"></div>
+                            <h5 class="fw-bold">Processing Payment...</h5>
+                            <p class="text-muted">Please wait, do not close this page.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Security Note -->
+                <div class="text-center mt-3 text-muted" style="font-size:13px">
+                    <i class="bi bi-shield-check text-success"></i>
+                    Your payment is secured with SSL encryption
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-md-5">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">
+                            <i class="bi bi-receipt"></i> Order Summary
+                        </h5>
+
+                        <div class="mb-3">
+                            <span class="text-muted" style="font-size:13px">Order</span>
+                            <span class="fw-bold ms-2">#@Model.Id</span>
+                        </div>
+
+                        @foreach (var item in Model.OrderItems)
+                        {
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <img src="@item.Product?.ImageUrl"
+                                     style="width:50px;height:45px;object-fit:cover;border-radius:8px" />
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold" style="font-size:14px">
+                                        @item.Product?.Name
+                                    </div>
+                                    <div class="text-muted" style="font-size:13px">
+                                        @item.Quantity x $@item.UnitPrice.ToString("0.00")
+                                    </div>
+                                </div>
+                                <div class="fw-bold">
+                                    $@((item.Quantity * item.UnitPrice).ToString("0.00"))
+                                </div>
+                            </div>
+                            <hr class="my-2" />
+                        }
+
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Subtotal</span>
+                            <span>$@Model.TotalPrice.ToString("0.00")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Shipping</span>
+                            <span class="text-success fw-bold">Free</span>
+                        </div>
+                        <hr />
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold fs-5">Total</span>
+                            <span class="fw-bold fs-4" style="color:#27ae60">
+                                $@Model.TotalPrice.ToString("0.00")
+                            </span>
+                        </div>
+
+                        <div class="mt-4 p-3 rounded-3" style="background:#f8f9fa">
+                            <p class="mb-1" style="font-size:13px">
+                                <i class="bi bi-geo-alt text-danger"></i>
+                                <strong>Deliver to:</strong>
+                            </p>
+                            <p class="mb-0 text-muted" style="font-size:13px">
+                                @Model.CustomerName — @Model.Address
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Format card number with spaces
+        document.getElementById("cardNumber").addEventListener("input", function () {
+            var value = this.value.replace(/\D/g, "");
+            var formatted = value.match(/.{1,4}/g)?.join(" ") || value;
+            this.value = formatted;
+        });
+
+        // Format expiry date
+        document.getElementById("expiryDate").addEventListener("input", function () {
+            var value = this.value.replace(/\D/g, "");
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + "/" + value.substring(2);
+            }
+            this.value = value;
+        });
+
+        // Validate expiry on blur
+        document.getElementById("expiryDate").addEventListener("blur", function () {
+            validateExpiry();
+        });
+
+        function validateExpiry() {
+            var value = document.getElementById("expiryDate").value;
+            var errorDiv = document.getElementById("expiryError");
+
+            if (value.length < 5) {
+                document.getElementById("expiryDate").classList.add("is-invalid");
+                errorDiv.textContent = "Please enter a valid expiry date.";
+                return false;
+            }
+
+            var parts     = value.split("/");
+            var month     = parseInt(parts[0]);
+            var year      = parseInt("20" + parts[1]);
+            var now       = new Date();
+            var currMonth = now.getMonth() + 1;
+            var currYear  = now.getFullYear();
+
+            if (month < 1 || month > 12) {
+                document.getElementById("expiryDate").classList.add("is-invalid");
+                errorDiv.textContent = "Invalid month. Must be between 01 and 12.";
+                return false;
+            }
+
+            if (year < currYear || (year === currYear && month < currMonth)) {
+                document.getElementById("expiryDate").classList.add("is-invalid");
+                errorDiv.textContent = "Card is expired. Please use a valid card.";
+                return false;
+            }
+
+            document.getElementById("expiryDate").classList.remove("is-invalid");
+            document.getElementById("expiryDate").classList.add("is-valid");
+            errorDiv.textContent = "";
+            return true;
+        }
+
+        function processPayment() {
+            var cardNumber  = document.getElementById("cardNumber").value.replace(/\s/g, "");
+            var cardHolder  = document.querySelector("input[name='cardHolder']").value;
+            var expiryDate  = document.getElementById("expiryDate").value;
+            var cvv         = document.querySelector("input[name='cvv']").value;
+            var isValid     = true;
+
+            // Validate card number
+            if (cardNumber.length < 16) {
+                document.getElementById("cardNumber").classList.add("is-invalid");
+                document.getElementById("cardError").textContent = "Please enter a valid 16 digit card number.";
+                isValid = false;
+            } else {
+                document.getElementById("cardNumber").classList.remove("is-invalid");
+                document.getElementById("cardError").textContent = "";
+            }
+
+            // Validate card holder
+            if (cardHolder.trim() === "") {
+                document.querySelector("input[name='cardHolder']").classList.add("is-invalid");
+                document.getElementById("holderError").textContent = "Please enter card holder name.";
+                isValid = false;
+            } else {
+                document.querySelector("input[name='cardHolder']").classList.remove("is-invalid");
+                document.getElementById("holderError").textContent = "";
+            }
+
+            // Validate expiry
+            if (!validateExpiry()) {
+                isValid = false;
+            }
+
+            // Validate CVV
+            if (cvv.length < 3) {
+                document.querySelector("input[name='cvv']").classList.add("is-invalid");
+                document.getElementById("cvvError").textContent = "Please enter a valid 3 digit CVV.";
+                isValid = false;
+            } else {
+                document.querySelector("input[name='cvv']").classList.remove("is-invalid");
+                document.getElementById("cvvError").textContent = "";
+            }
+
+            // Only show loading if all valid
+            if (isValid) {
+                document.getElementById("paymentForm").style.display = "none";
+                document.getElementById("loadingDiv").style.display = "block";
+                return true;
+            }
+
+            return false;
+        }
+
+        // Prevent form submit if invalid
+        document.getElementById("paymentForm").addEventListener("submit", function (e) {
+            if (!processPayment()) {
+                e.preventDefault();
+            }
+        });
+    </script>
+}

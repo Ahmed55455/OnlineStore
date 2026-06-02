@@ -1,0 +1,153 @@
+@model List<OnlineStore.Models.Order>
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-4">
+        <i class="bi bi-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">
+        <i class="bi bi-speedometer2"></i> Admin Dashboard
+    </h2>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 text-white"
+             style="background:#1a1a2e">
+            <div class="card-body p-4">
+                <i class="bi bi-box-seam fs-2"></i>
+                <h3 class="fw-bold mt-2">@ViewBag.TotalProducts</h3>
+                <p class="mb-0 opacity-75">Total Products</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 text-white"
+             style="background:#0f3460">
+            <div class="card-body p-4">
+                <i class="bi bi-tag fs-2"></i>
+                <h3 class="fw-bold mt-2">@ViewBag.TotalCategories</h3>
+                <p class="mb-0 opacity-75">Categories</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 text-white"
+             style="background:#e74c3c">
+            <div class="card-body p-4">
+                <i class="bi bi-bag-check fs-2"></i>
+                <h3 class="fw-bold mt-2">@ViewBag.TotalOrders</h3>
+                <p class="mb-0 opacity-75">Total Orders</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 text-white"
+             style="background:#27ae60">
+            <div class="card-body p-4">
+                <i class="bi bi-currency-dollar fs-2"></i>
+                <h3 class="fw-bold mt-2">$@ViewBag.TotalRevenue.ToString("0.00")</h3>
+                <p class="mb-0 opacity-75">Total Revenue</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Links -->
+<div class="row g-3 mb-5">
+    <div class="col-md-4">
+        <a asp-controller="Admin" asp-action="Products"
+           class="card border-0 shadow-sm rounded-4 text-decoration-none text-dark p-4 d-block">
+            <i class="bi bi-box-seam fs-3"></i>
+            <h5 class="fw-bold mt-2">Manage Products</h5>
+            <p class="text-muted mb-0">Add, edit, or delete products</p>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="Admin" asp-action="Categories"
+           class="card border-0 shadow-sm rounded-4 text-decoration-none text-dark p-4 d-block">
+            <i class="bi bi-tag fs-3"></i>
+            <h5 class="fw-bold mt-2">Manage Categories</h5>
+            <p class="text-muted mb-0">Add, edit, or delete categories</p>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="Admin" asp-action="Orders"
+           class="card border-0 shadow-sm rounded-4 text-decoration-none text-dark p-4 d-block">
+            <i class="bi bi-receipt fs-3"></i>
+            <h5 class="fw-bold mt-2">Manage Orders</h5>
+            <p class="text-muted mb-0">View and track all orders</p>
+        </a>
+    </div>
+</div>
+
+<!-- Recent Orders -->
+<h5 class="fw-bold mb-3"><i class="bi bi-clock-history"></i> Recent Orders</h5>
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <p class="text-muted text-center py-4">No orders yet.</p>
+        }
+        else
+        {
+            <table class="table table-hover mb-0">
+                <thead style="background:#1a1a2e; color:white">
+                    <tr>
+                        <th class="p-3">Order ID</th>
+                        <th class="p-3">Date</th>
+                        <th class="p-3">Items</th>
+                        <th class="p-3">Total</th>
+                        <th class="p-3">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <td class="p-3">#@order.Id</td>
+                            <td class="p-3">@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                            <td class="p-3">
+                                @foreach (var item in order.OrderItems)
+                                {
+                                    <div style="font-size:13px">
+                                        @item.Product?.Name
+                                        <span class="text-muted">× @item.Quantity</span>
+                                    </div>
+                                }
+                            </td>
+                            <td class="p-3 fw-bold">$@order.TotalPrice.ToString("0.00")</td>
+                            <td class="p-3">
+                                @if (order.Status == "Pending")
+                                {
+                                    <span class="badge bg-warning text-dark">🟡 Pending</span>
+                                }
+                                else if (order.Status == "Processing")
+                                {
+                                    <span class="badge bg-primary">🔵 Processing</span>
+                                }
+                                else if (order.Status == "Delivered")
+                                {
+                                    <span class="badge bg-success">🟢 Delivered</span>
+                                }
+                                else if (order.Status == "Cancelled")
+                                {
+                                    <span class="badge bg-danger">🔴 Cancelled</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

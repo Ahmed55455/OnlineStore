@@ -1,0 +1,206 @@
+@model List<OnlineStore.Models.Product>
+
+@{
+    ViewData["Title"] = "Manage Products";
+    var categories = ViewBag.Categories as List<OnlineStore.Models.Category>;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">
+        <i class="bi bi-box-seam"></i> Manage Products
+    </h2>
+    <div class="d-flex gap-2">
+        <a asp-controller="Admin" asp-action="Dashboard"
+           class="btn btn-outline-dark btn-sm">
+            <i class="bi bi-arrow-left"></i> Dashboard
+        </a>
+        <button class="btn btn-sm text-white"
+                style="background:#1a1a2e"
+                data-bs-toggle="modal"
+                data-bs-target="#addProductModal">
+            <i class="bi bi-plus-lg"></i> Add Product
+        </button>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Products Table -->
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead style="background:#1a1a2e; color:white">
+                <tr>
+                    <th class="p-3">ID</th>
+                    <th class="p-3">Product</th>
+                    <th class="p-3">Category</th>
+                    <th class="p-3">Price</th>
+                    <th class="p-3">Stock</th>
+                    <th class="p-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in Model)
+                {
+                    <tr>
+                        <td class="p-3">#@product.Id</td>
+                        <td class="p-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="@product.ImageUrl"
+                                     style="width:45px;height:40px;object-fit:cover;border-radius:6px" />
+                                <span class="fw-bold">@product.Name</span>
+                            </div>
+                        </td>
+                        <td class="p-3">@product.Category?.Name</td>
+                        <td class="p-3 fw-bold">$@product.Price.ToString("0.00")</td>
+                        <td class="p-3">
+                            <span class="badge @(product.Stock > 0 ? "bg-success" : "bg-danger")">
+                                @product.Stock
+                            </span>
+                        </td>
+                        <td class="p-3">
+                            <a asp-controller="Admin"
+                               asp-action="EditProduct"
+                               asp-route-id="@product.Id"
+                               class="btn btn-sm btn-outline-primary me-1">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form asp-controller="Admin"
+                                  asp-action="DeleteProduct"
+                                  method="post"
+                                  class="d-inline"
+                                  id="deleteForm@(product.Id)">
+                                <input type="hidden" name="id" value="@product.Id" />
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger"
+                                        onclick="confirmDelete('@product.Id', '@product.Name')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4">
+            <div class="modal-header" style="background:#1a1a2e">
+                <h5 class="modal-title text-white">
+                    <i class="bi bi-plus-lg"></i> Add New Product
+                </h5>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-controller="Admin" asp-action="AddProduct" method="post">
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">Product Name</label>
+                            <input type="text" name="Name"
+                                   class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Category</label>
+                            <select name="CategoryId" class="form-select" required>
+                                @foreach (var cat in categories!)
+                                {
+                                    <option value="@cat.Id">@cat.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Description</label>
+                            <textarea name="Description"
+                                      class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Price ($)</label>
+                            <input type="number" name="Price" step="0.01" min="0.01"
+                                   class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Stock</label>
+                            <input type="number" name="Stock" min="0"
+                                   class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Image URL</label>
+                            <input type="text" name="ImageUrl"
+                                   class="form-control"
+                                   placeholder="https://..." />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-dark"
+                            data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit"
+                            class="btn text-white"
+                            style="background:#1a1a2e">
+                        <i class="bi bi-plus-lg"></i> Add Product
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-body p-4 text-center">
+                <div style="width:60px;height:60px;background:#fff0f0;border-radius:50%;
+                            display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px">
+                    <i class="bi bi-trash text-danger" style="font-size:28px"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Delete Product</h5>
+                <p class="text-muted mb-4">
+                    Are you sure you want to delete
+                    <strong id="productName"></strong>?
+                    This action cannot be undone.
+                </p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button"
+                            class="btn btn-outline-dark px-4"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="button"
+                            class="btn btn-danger px-4"
+                            id="confirmDeleteBtn">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var deleteFormId = "";
+
+        function confirmDelete(productId, productName) {
+            deleteFormId = "deleteForm" + productId;
+            document.getElementById("productName").textContent = productName;
+            var modal = new bootstrap.Modal(document.getElementById("deleteModal"));
+            modal.show();
+        }
+
+        document.getElementById("confirmDeleteBtn").addEventListener("click", function () {
+            document.getElementById(deleteFormId).submit();
+        });
+    </script>
+}

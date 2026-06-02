@@ -1,0 +1,211 @@
+@model List<OnlineStore.Models.Order>
+
+@{
+    ViewData["Title"] = "Manage Orders";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">
+        <i class="bi bi-receipt"></i> Manage Orders
+    </h2>
+    <a asp-controller="Admin" asp-action="Dashboard"
+       class="btn btn-outline-dark btn-sm">
+        <i class="bi bi-arrow-left"></i> Dashboard
+    </a>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-receipt-cutoff" style="font-size:80px; color:#ccc"></i>
+        <h4 class="mt-3 text-muted">No orders yet</h4>
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead style="background:#1a1a2e; color:white">
+                    <tr>
+                        <th class="p-3">Order ID</th>
+                        <th class="p-3">Customer</th>
+                        <th class="p-3">Address</th>
+                        <th class="p-3">Items</th>
+                        <th class="p-3">Total</th>
+                        <th class="p-3">Status</th>
+                        <th class="p-3">Change Status</th>
+                        <th class="p-3">Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <td class="p-3 fw-bold">#@order.Id</td>
+                            <td class="p-3">
+                                <div class="fw-bold">@order.CustomerName</div>
+                                <div style="font-size:12px; color:#888">
+                                    <i class="bi bi-envelope"></i> @order.CustomerEmail
+                                </div>
+                                <div style="font-size:11px; color:#aaa">
+                                    @order.OrderDate.ToString("MMM dd, yyyy hh:mm tt")
+                                </div>
+                            </td>
+                            <td class="p-3">
+                                <div style="font-size:13px; max-width:150px">
+                                    <i class="bi bi-geo-alt text-danger"></i>
+                                    @order.Address
+                                </div>
+                            </td>
+                            <td class="p-3">
+                                @foreach (var item in order.OrderItems)
+                                {
+                                    <div style="font-size:13px">
+                                        @item.Product?.Name
+                                        <span class="text-muted">× @item.Quantity</span>
+                                    </div>
+                                }
+                            </td>
+                            <td class="p-3 fw-bold text-success">
+                                $@order.TotalPrice.ToString("0.00")
+                            </td>
+                            <td class="p-3">
+                                @if (order.Status == "Pending")
+                                {
+                                    <span class="badge bg-warning text-dark fs-6">🟡 Pending</span>
+                                }
+                                else if (order.Status == "Processing")
+                                {
+                                    <span class="badge bg-primary fs-6">🔵 Processing</span>
+                                }
+                                else if (order.Status == "Delivered")
+                                {
+                                    <span class="badge bg-success fs-6">🟢 Delivered</span>
+                                }
+                                else if (order.Status == "Cancelled")
+                                {
+                                    <span class="badge bg-danger fs-6">🔴 Cancelled</span>
+                                }
+                            </td>
+                            <td class="p-3">
+                                <form asp-controller="Admin"
+                                      asp-action="UpdateOrderStatus"
+                                      method="post"
+                                      class="d-flex gap-2 align-items-center">
+                                    <input type="hidden" name="orderId" value="@order.Id" />
+                                    <select name="status" class="form-select form-select-sm"
+                                            style="width:145px">
+                                        @if (order.Status == "Pending")
+                                        {
+                                            <option value="Pending" selected>🟡 Pending</option>
+                                            <option value="Processing">🔵 Processing</option>
+                                            <option value="Delivered">🟢 Delivered</option>
+                                            <option value="Cancelled">🔴 Cancelled</option>
+                                        }
+                                        else if (order.Status == "Processing")
+                                        {
+                                            <option value="Pending">🟡 Pending</option>
+                                            <option value="Processing" selected>🔵 Processing</option>
+                                            <option value="Delivered">🟢 Delivered</option>
+                                            <option value="Cancelled">🔴 Cancelled</option>
+                                        }
+                                        else if (order.Status == "Delivered")
+                                        {
+                                            <option value="Pending">🟡 Pending</option>
+                                            <option value="Processing">🔵 Processing</option>
+                                            <option value="Delivered" selected>🟢 Delivered</option>
+                                            <option value="Cancelled">🔴 Cancelled</option>
+                                        }
+                                        else if (order.Status == "Cancelled")
+                                        {
+                                            <option value="Pending">🟡 Pending</option>
+                                            <option value="Processing">🔵 Processing</option>
+                                            <option value="Delivered">🟢 Delivered</option>
+                                            <option value="Cancelled" selected>🔴 Cancelled</option>
+                                        }
+                                    </select>
+                                    <button type="submit"
+                                            class="btn btn-sm text-white"
+                                            style="background:#1a1a2e">
+                                        <i class="bi bi-check-lg"></i> Save
+                                    </button>
+                                </form>
+                            </td>
+                            <td class="p-3">
+                                <form asp-controller="Admin"
+                                      asp-action="DeleteOrder"
+                                      method="post"
+                                      id="deleteOrderForm@(order.Id)">
+                                    <input type="hidden" name="orderId" value="@order.Id" />
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger"
+                                            onclick="confirmDelete('@order.Id', 'Order #@order.Id')">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-body p-4 text-center">
+                <div style="width:60px;height:60px;background:#fff0f0;border-radius:50%;
+                            display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px">
+                    <i class="bi bi-trash text-danger" style="font-size:28px"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Delete Order</h5>
+                <p class="text-muted mb-4">
+                    Are you sure you want to delete
+                    <strong id="orderName"></strong>?
+                    This action cannot be undone.
+                </p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button"
+                            class="btn btn-outline-dark px-4"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="button"
+                            class="btn btn-danger px-4"
+                            id="confirmDeleteBtn">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var deleteFormId = "";
+
+        function confirmDelete(orderId, orderName) {
+            deleteFormId = "deleteOrderForm" + orderId;
+            document.getElementById("orderName").textContent = orderName;
+            var modal = new bootstrap.Modal(document.getElementById("deleteModal"));
+            modal.show();
+        }
+
+        document.getElementById("confirmDeleteBtn").addEventListener("click", function () {
+            document.getElementById(deleteFormId).submit();
+        });
+    </script>
+}

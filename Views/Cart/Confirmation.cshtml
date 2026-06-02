@@ -1,0 +1,146 @@
+@model OnlineStore.Models.Order
+
+@{
+    ViewData["Title"] = "Order Confirmed";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+
+        <!-- Success Header -->
+        <div class="text-center mb-5">
+            <div style="width:80px; height:80px; background:#27ae60; border-radius:50%;
+                        display:inline-flex; align-items:center; justify-content:center; margin-bottom:20px">
+                <i class="bi bi-check-lg text-white" style="font-size:40px"></i>
+            </div>
+            <h2 class="fw-bold">Order Confirmed! 🎉</h2>
+            <p class="text-muted fs-5">
+                Thank you <strong>@Model.CustomerName</strong>! Your order has been placed successfully.
+            </p>
+            <span class="badge fs-5 px-4 py-2" style="background:#1a1a2e">
+                Order #@Model.Id
+            </span>
+        </div>
+
+        <!-- Order Details Card -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-white rounded-top-4 p-3">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-receipt"></i> Order Details
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="text-muted mb-1" style="font-size:13px">Order Date</p>
+                        <p class="fw-bold">@Model.OrderDate.ToString("MMM dd, yyyy hh:mm tt")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="text-muted mb-1" style="font-size:13px">Order Status</p>
+                        @if (Model.Status == "Pending")
+                        {
+                            <span class="badge bg-warning text-dark fs-6">🟡 Pending</span>
+                        }
+                        else if (Model.Status == "Processing")
+                        {
+                            <span class="badge bg-primary fs-6">🔵 Processing</span>
+                        }
+                        else if (Model.Status == "Delivered")
+                        {
+                            <span class="badge bg-success fs-6">🟢 Delivered</span>
+                        }
+                        else if (Model.Status == "Cancelled")
+                        {
+                            <span class="badge bg-danger fs-6">🔴 Cancelled</span>
+                        }
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="text-muted mb-1" style="font-size:13px">Payment Status</p>
+                        @if (Model.PaymentStatus == "Paid")
+                        {
+                            <span class="badge bg-success fs-6">
+                                <i class="bi bi-check-circle"></i> Paid
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger fs-6">
+                                <i class="bi bi-x-circle"></i> Unpaid
+                            </span>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <p class="text-muted mb-1" style="font-size:13px">Payment Method</p>
+                        <p class="fw-bold">
+                            <i class="bi bi-credit-card text-primary"></i> @Model.PaymentMethod
+                        </p>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="text-muted mb-1" style="font-size:13px">Email</p>
+                        <p class="fw-bold">@Model.CustomerEmail</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="text-muted mb-1" style="font-size:13px">Delivery Address</p>
+                        <p class="fw-bold">
+                            <i class="bi bi-geo-alt text-danger"></i> @Model.Address
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Items Card -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-white rounded-top-4 p-3">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-box-seam"></i> Items Ordered
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                @foreach (var item in Model.OrderItems)
+                {
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <img src="@item.Product?.ImageUrl"
+                             style="width:60px;height:55px;object-fit:cover;border-radius:8px" />
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">@item.Product?.Name</div>
+                            <div class="text-muted" style="font-size:13px">
+                                @item.Quantity x $@item.UnitPrice.ToString("0.00")
+                            </div>
+                        </div>
+                        <div class="fw-bold fs-5">
+                            $@((item.Quantity * item.UnitPrice).ToString("0.00"))
+                        </div>
+                    </div>
+                    <hr class="my-2" />
+                }
+
+                <!-- Total -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span class="fw-bold fs-5">Total</span>
+                    <span class="fw-bold fs-4" style="color:#1a1a2e">
+                        $@Model.TotalPrice.ToString("0.00")
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex gap-3 justify-content-center">
+            <a asp-controller="Account" asp-action="MyOrders"
+               class="btn btn-lg px-5 text-white"
+               style="background:#1a1a2e">
+                <i class="bi bi-bag-check"></i> My Orders
+            </a>
+            <a asp-controller="Products" asp-action="Index"
+               class="btn btn-lg btn-outline-dark px-5">
+                <i class="bi bi-grid"></i> Continue Shopping
+            </a>
+        </div>
+
+    </div>
+</div>
