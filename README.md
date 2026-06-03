@@ -80,7 +80,7 @@ Admin           → Id, Username, PasswordHash
 | Entity Framework Core | ORM & database management |
 | SQLite | Database |
 | Razor Views (.cshtml) | Server-side templating |
-| Bootstrap 5 | UI styling |
+| Bootstrap 4  | UI styling |
 | Bootstrap Icons | Icon library |
 | SHA-256 | Password hashing |
 | Session | Authentication |
