@@ -1,4 +1,4 @@
-# Use the official .NET SDK image to build the app
+# Use the official .NET SDK image
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
@@ -8,16 +8,16 @@ RUN dotnet restore
 
 # Copy everything else and build
 COPY . .
+# Use a flexible build command
 RUN dotnet publish -c Release -o /app/publish
 
-# Use the ASP.NET runtime image to run the app
+# Use the ASP.NET runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Expose the port the app runs on
+# Expose the port
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
 
-# Define the entry point for the application
 ENTRYPOINT ["dotnet", "OnlineStore.dll"]
