@@ -24,6 +24,9 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
+    // This line automatically handles database creation and structure setup
+    context.Database.Migrate(); 
+
     // Seed Categories and Products
     if (!context.Categories.Any())
     {
@@ -40,72 +43,72 @@ using (var scope = app.Services.CreateScope())
         var clothing    = context.Categories.First(c => c.Name == "Clothing");
         var books       = context.Categories.First(c => c.Name == "Books");
 
-var products = new List<Product>
-{
-    new Product
-    {
-        Name        = "Laptop Pro",
-        Description = "A powerful laptop for professionals.",
-        Price       = 1200.00m,
-        Stock       = 10,
-        ImageUrl    = "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=300&fit=crop",
-        CategoryId  = electronics.Id
-    },
-    new Product
-    {
-        Name        = "Wireless Headphones",
-        Description = "Noise cancelling wireless headphones.",
-        Price       = 250.00m,
-        Stock       = 25,
-        ImageUrl    = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop",
-        CategoryId  = electronics.Id
-    },
-    new Product
-    {
-        Name        = "Smart Watch",
-        Description = "Track your fitness and stay connected.",
-        Price       = 199.00m,
-        Stock       = 15,
-        ImageUrl    = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop",
-        CategoryId  = electronics.Id
-    },
-    new Product
-    {
-        Name        = "Classic T-Shirt",
-        Description = "Comfortable cotton t-shirt.",
-        Price       = 25.00m,
-        Stock       = 100,
-        ImageUrl    = "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop",
-        CategoryId  = clothing.Id
-    },
-    new Product
-    {
-        Name        = "Denim Jacket",
-        Description = "Stylish denim jacket for all seasons.",
-        Price       = 89.00m,
-        Stock       = 40,
-        ImageUrl    = "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&h=300&fit=crop",
-        CategoryId  = clothing.Id
-    },
-    new Product
-    {
-        Name        = "C# Programming Guide",
-        Description = "Complete guide to C# programming.",
-        Price       = 45.00m,
-        Stock       = 60,
-        ImageUrl    = "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400&h=300&fit=crop",
-        CategoryId  = books.Id
-    },
-    new Product
-    {
-        Name        = "ASP.NET Core in Action",
-        Description = "Build modern web apps with ASP.NET Core.",
-        Price       = 55.00m,
-        Stock       = 35,
-        ImageUrl    = "https://images.unsplash.com/photo-1589998059171-988d887df646?w=400&h=300&fit=crop",
-        CategoryId  = books.Id
-    }
-};
+        var products = new List<Product>
+        {
+            new Product
+            {
+                Name        = "Laptop Pro",
+                Description = "A powerful laptop for professionals.",
+                Price       = 1200.00m,
+                Stock       = 10,
+                ImageUrl    = "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=300&fit=crop",
+                CategoryId  = electronics.Id
+            },
+            new Product
+            {
+                Name        = "Wireless Headphones",
+                Description = "Noise cancelling wireless headphones.",
+                Price       = 250.00m,
+                Stock       = 25,
+                ImageUrl    = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop",
+                CategoryId  = electronics.Id
+            },
+            new Product
+            {
+                Name        = "Smart Watch",
+                Description = "Track your fitness and stay connected.",
+                Price       = 199.00m,
+                Stock       = 15,
+                ImageUrl    = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop",
+                CategoryId  = electronics.Id
+            },
+            new Product
+            {
+                Name        = "Classic T-Shirt",
+                Description = "Comfortable cotton t-shirt.",
+                Price       = 25.00m,
+                Stock       = 100,
+                ImageUrl    = "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=300&fit=crop",
+                CategoryId  = clothing.Id
+            },
+            new Product
+            {
+                Name        = "Denim Jacket",
+                Description = "Stylish denim jacket for all seasons.",
+                Price       = 89.00m,
+                Stock       = 40,
+                ImageUrl    = "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&h=300&fit=crop",
+                CategoryId  = clothing.Id
+            },
+            new Product
+            {
+                Name        = "C# Programming Guide",
+                Description = "Complete guide to C# programming.",
+                Price       = 45.00m,
+                Stock       = 60,
+                ImageUrl    = "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400&h=300&fit=crop",
+                CategoryId  = books.Id
+            },
+            new Product
+            {
+                Name        = "ASP.NET Core in Action",
+                Description = "Build modern web apps with ASP.NET Core.",
+                Price       = 55.00m,
+                Stock       = 35,
+                ImageUrl    = "https://images.unsplash.com/photo-1589998059171-988d887df646?w=400&h=300&fit=crop",
+                CategoryId  = books.Id
+            }
+        };
         context.Products.AddRange(products);
         context.SaveChanges();
     }
